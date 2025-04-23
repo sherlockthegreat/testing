@@ -1,32 +1,27 @@
 import streamlit as st
 import pandas as pd
 import requests
-from bs4 import BeautifulSoup
+import streamlit.components.v1 as components
 
-def get_tweet_preview(tweet_url):
+def get_tweet_embed_html(tweet_url):
+    api_url = f"https://publish.twitter.com/oembed?url={tweet_url}"
     try:
-        headers = {"User-Agent": "Mozilla/5.0"}
-        response = requests.get(tweet_url, headers=headers, timeout=10)
-        soup = BeautifulSoup(response.text, 'html.parser')
-        meta_tag = soup.find('meta', {'property': 'og:description'})
-        if meta_tag and meta_tag.get('content'):
-            return meta_tag.get('content')
-        tweet_div = soup.find('div', {'data-testid': 'tweetText'})
-        if tweet_div:
-            return tweet_div.get_text(separator=' ', strip=True)
-        return "Could not extract tweet text."
+        response = requests.get(api_url)
+        if response.status_code == 200:
+            return response.json()['html']
+        else:
+            return f"<p>Could not embed tweet: {tweet_url}</p>"
     except Exception as e:
-        return f"Error: {e}"
+        return f"<p>Error: {e}</p>"
 
-st.title("Tweet Previewer")
+st.title("Tweet Embedder")
 
 option = st.radio("Choose input method:", ("Paste URLs", "Upload CSV"))
 
 tweet_links = []
 
 if option == "Paste URLs":
-    st.write("Paste one tweet URL per line:")
-    url_text = st.text_area("Tweet URLs", height=150)
+    url_text = st.text_area("Paste one tweet URL per line:")
     if url_text:
         tweet_links = [line.strip() for line in url_text.splitlines() if line.strip()]
 elif option == "Upload CSV":
@@ -39,9 +34,7 @@ elif option == "Upload CSV":
             st.error("CSV must have a column named 'url'.")
 
 if tweet_links:
-    st.write("## Tweet Previews")
-    previews = []
+    st.write("## Embedded Tweets")
     for url in tweet_links:
-        preview = get_tweet_preview(url)
-        previews.append({'URL': url, 'Preview': preview})
-    st.dataframe(pd.DataFrame(previews))
+        html = get_tweet_embed_html(url)
+        components.html(html, height=600)
