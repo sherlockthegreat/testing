@@ -38,14 +38,18 @@ if tweet_links:
     for i, url in enumerate(tweet_links):
         html = get_tweet_embed_html(url)
 
-        copy_button_html = f"""
+        button_html = f"""
         <div style="margin-bottom: 40px;">
             <button onclick="navigator.clipboard.writeText('{url}'); alert('Copied to clipboard: {url}');" 
                     style="margin-bottom:10px; padding:6px 12px; cursor:pointer;">
                 Copy Link
             </button>
+            <button onclick="window.open('{url}', '_blank');"
+                    style="margin-left:10px; margin-bottom:10px; padding:6px 12px; cursor:pointer;">
+                Open Tweet
+            </button>
             {html}
         </div>
         """
 
-        components.html(copy_button_html, height=700)
+        components.html(button_html, height=700)
