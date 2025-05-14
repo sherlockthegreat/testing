@@ -35,6 +35,17 @@ elif option == "Upload CSV":
 
 if tweet_links:
     st.write("## Embedded Tweets")
-    for url in tweet_links:
+    for i, url in enumerate(tweet_links):
         html = get_tweet_embed_html(url)
-        components.html(html, height=600)
+
+        copy_button_html = f"""
+        <div style="margin-bottom: 40px;">
+            <button onclick="navigator.clipboard.writeText('{url}'); alert('Copied to clipboard: {url}');" 
+                    style="margin-bottom:10px; padding:6px 12px; cursor:pointer;">
+                Copy Link
+            </button>
+            {html}
+        </div>
+        """
+
+        components.html(copy_button_html, height=700)
